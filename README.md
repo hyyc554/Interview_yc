@@ -1143,17 +1143,473 @@ NoSql、Cloudant、MongoDb、redis、HBase
 常见SQL（必备）
 详见武沛齐博客：https://www.cnblogs.com/wupeiqi/articles/5729934.html
 
-简述触发器、函数、视图、存储过程？
+### 简述触发器、函数、视图、存储过程
+`触发器`:
+使用触发器可以定制用户对表进行【增、删、改】操作时前后的行为，注意：没有查询
+`存储过程`:
+存储过程包含了一系列可执行的sql语句，存储过程存放于MySQL中，通过调用它的名字可以执行其内部的一堆sql
 
-MySQL索引种类
+使用存储过程的优点：
+1. 用于替代程序写的SQL语句，实现程序与sql解耦
+2. 基于网络传输，传别名的数据量小，而直接传sql数据量大
+使用存储过程的缺点：
+1. 程序员扩展功能不方便
 
-索引在什么情况下遵循最左前缀的规则？
+`函数`:
+```
+一、数学函数
+    ROUND(x,y)
+        返回参数x的四舍五入的有y位小数的值
 
-主键和外键的区别？
+    RAND()
+        返回０到１内的随机值,可以通过提供一个参数(种子)使RAND()随机数生成器生成一个指定的值。
 
-MySQL常见的函数？
+二、聚合函数(常用于GROUP BY从句的SELECT查询中)
+    AVG(col)返回指定列的平均值
+    COUNT(col)返回指定列中非NULL值的个数
+    MIN(col)返回指定列的最小值
+    MAX(col)返回指定列的最大值
+    SUM(col)返回指定列的所有值之和
+    GROUP_CONCAT(col) 返回由属于一组的列值连接组合而成的结果    
 
-列举 创建索引但是无法命中索引的8种情况。
+三、字符串函数
+
+    CHAR_LENGTH(str)
+        返回值为字符串str 的长度，长度的单位为字符。一个多字节字符算作一个单字符。
+    CONCAT(str1,str2,...)
+        字符串拼接
+        如有任何一个参数为NULL ，则返回值为 NULL。
+    CONCAT_WS(separator,str1,str2,...)
+        字符串拼接（自定义连接符）
+        CONCAT_WS()不会忽略任何空字符串。 (然而会忽略所有的 NULL）。
+
+    CONV(N,from_base,to_base)
+        进制转换
+        例如：
+            SELECT CONV('a',16,2); 表示将 a 由16进制转换为2进制字符串表示
+
+    FORMAT(X,D)
+        将数字X 的格式写为'#,###,###.##',以四舍五入的方式保留小数点后 D 位， 并将结果以字符串的形式返回。若  D 为 0, 则返回结果不带有小数点，或不含小数部分。
+        例如：
+            SELECT FORMAT(12332.1,4); 结果为： '12,332.1000'
+    INSERT(str,pos,len,newstr)
+        在str的指定位置插入字符串
+            pos：要替换位置其实位置
+            len：替换的长度
+            newstr：新字符串
+        特别的：
+            如果pos超过原字符串长度，则返回原字符串
+            如果len超过原字符串长度，则由新字符串完全替换
+    INSTR(str,substr)
+        返回字符串 str 中子字符串的第一个出现位置。
+
+    LEFT(str,len)
+        返回字符串str 从开始的len位置的子序列字符。
+
+    LOWER(str)
+        变小写
+
+    UPPER(str)
+        变大写
+
+    REVERSE(str)
+        返回字符串 str ，顺序和字符顺序相反。
+
+    SUBSTRING(str,pos) , SUBSTRING(str FROM pos) SUBSTRING(str,pos,len) , SUBSTRING(str FROM pos FOR len)
+        不带有len 参数的格式从字符串str返回一个子字符串，起始于位置 pos。带有len参数的格式从字符串str返回一个长度同len字符相同的子字符串，起始于位置 pos。 使用 FROM的格式为标准 SQL 语法。也可能对pos使用一个负值。假若这样，则子字符串的位置起始于字符串结尾的pos 字符，而不是字符串的开头位置。在以下格式的函数中可以对pos 使用一个负值。
+
+        mysql> SELECT SUBSTRING('Quadratically',5);
+            -> 'ratically'
+
+        mysql> SELECT SUBSTRING('foobarbar' FROM 4);
+            -> 'barbar'
+
+        mysql> SELECT SUBSTRING('Quadratically',5,6);
+            -> 'ratica'
+
+        mysql> SELECT SUBSTRING('Sakila', -3);
+            -> 'ila'
+
+        mysql> SELECT SUBSTRING('Sakila', -5, 3);
+            -> 'aki'
+
+        mysql> SELECT SUBSTRING('Sakila' FROM -4 FOR 2);
+            -> 'ki'
+
+四、日期和时间函数
+    CURDATE()或CURRENT_DATE() 返回当前的日期
+    CURTIME()或CURRENT_TIME() 返回当前的时间
+    DAYOFWEEK(date)   返回date所代表的一星期中的第几天(1~7)
+    DAYOFMONTH(date)  返回date是一个月的第几天(1~31)
+    DAYOFYEAR(date)   返回date是一年的第几天(1~366)
+    DAYNAME(date)   返回date的星期名，如：SELECT DAYNAME(CURRENT_DATE);
+    FROM_UNIXTIME(ts,fmt)  根据指定的fmt格式，格式化UNIX时间戳ts
+    HOUR(time)   返回time的小时值(0~23)
+    MINUTE(time)   返回time的分钟值(0~59)
+    MONTH(date)   返回date的月份值(1~12)
+    MONTHNAME(date)   返回date的月份名，如：SELECT MONTHNAME(CURRENT_DATE);
+    NOW()    返回当前的日期和时间
+    QUARTER(date)   返回date在一年中的季度(1~4)，如SELECT QUARTER(CURRENT_DATE);
+    WEEK(date)   返回日期date为一年中第几周(0~53)
+    YEAR(date)   返回日期date的年份(1000~9999)
+
+    重点:
+    DATE_FORMAT(date,format) 根据format字符串格式化date值
+
+       mysql> SELECT DATE_FORMAT('2009-10-04 22:23:00', '%W %M %Y');
+        -> 'Sunday October 2009'
+       mysql> SELECT DATE_FORMAT('2007-10-04 22:23:00', '%H:%i:%s');
+        -> '22:23:00'
+       mysql> SELECT DATE_FORMAT('1900-10-04 22:23:00',
+        ->                 '%D %y %a %d %m %b %j');
+        -> '4th 00 Thu 04 10 Oct 277'
+       mysql> SELECT DATE_FORMAT('1997-10-04 22:23:00',
+        ->                 '%H %k %I %r %T %S %w');
+        -> '22 22 10 10:23:00 PM 22:23:00 00 6'
+       mysql> SELECT DATE_FORMAT('1999-01-01', '%X %V');
+        -> '1998 52'
+       mysql> SELECT DATE_FORMAT('2006-06-00', '%d');
+        -> '00'
+
+五、加密函数
+    MD5()    
+        计算字符串str的MD5校验和
+    PASSWORD(str)   
+        返回字符串str的加密版本，这个加密过程是不可逆转的，和UNIX密码加密过程使用不同的算法。
+
+六、控制流函数            
+    CASE WHEN[test1] THEN [result1]...ELSE [default] END
+        如果testN是真，则返回resultN，否则返回default
+    CASE [test] WHEN[val1] THEN [result]...ELSE [default]END  
+        如果test和valN相等，则返回resultN，否则返回default
+
+    IF(test,t,f)   
+        如果test是真，返回t；否则返回f
+
+    IFNULL(arg1,arg2) 
+        如果arg1不是空，返回arg1，否则返回arg2
+
+    NULLIF(arg1,arg2) 
+        如果arg1=arg2返回NULL；否则返回arg1        
+
+```
+`视图`:
+视图是一个虚拟表（非真实存在），其本质是【根据SQL语句获取动态的数据集，并为其命名】，用户使用时只需使用【名称】即可获取结果集，可以将该结果集当做表来使用。
+
+使用视图我们可以把查询过程中的临时表摘出来，用视图去实现，这样以后再想操作该临时表的数据时就无需重写复杂的sql了，直接去视图中查找即可，但视图有明显地效率问题，并且视图是存放在数据库中的，如果我们程序中使用的sql过分依赖数据库中的视图，即强耦合，那就意味着扩展sql极为不便，因此并不推荐使用
+
+---
+
+
+### MySQL索引种类
+MySQL目前主要有以下几种索引类型：
+1. 普通索引
+2. 唯一索引
+3. 主键索引
+4. 组合索引
+5. 全文索引
+
+[mysql索引类型](https://www.jianshu.com/p/7a0c215edb1d)
+------------
+
+### 索引在什么情况下遵循最左前缀的规则？
+最左前缀匹配原则
+在mysql建立联合索引时会遵循最左前缀匹配的原则，即最左优先，在检索数据时从联合索引的最左边开始匹配
+
+示例：
+```
+CREATE TABLE `user` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(32) NOT NULL,
+  `city` varchar(30) NOT NULL,
+  `age` tinyint(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `name_city_name` (`name`,`city`,`age`)
+) ENGINE=InnoDB AUTO_INCREMENT=6103 DEFAULT CHARSET=utf8;
+```
+联合索引
+
+``` 
+KEY "name_city_name" ("name","city","age") 
+```
+实际上建立了 (name),(name,city),(name,city,age) 三个索引
+
+-------
+
+### 主键和外键的区别？
+定义：
+主键：唯一标识一条记录，不能有重复，不允许为空。
+外键：表的外键是另一表的主键，外键是可以有重复的，可以是空值。
+索引：该字段没有重复值，但可以有一个空值。
+
+作用：
+主键：用来保证数据完整性
+外键：用来和其他表建立联系用
+索引：用来提高查询排序的速度
+
+个数：
+主键：主键只能有一个。
+外键：一个表可以有多个外键。
+索引：一个表可以有多个唯一索引。
+
+------
+
+### MySQL常见的函数？
+```
+一、数学函数
+    ROUND(x,y)
+        返回参数x的四舍五入的有y位小数的值
+
+    RAND()
+        返回０到１内的随机值,可以通过提供一个参数(种子)使RAND()随机数生成器生成一个指定的值。
+
+二、聚合函数(常用于GROUP BY从句的SELECT查询中)
+    AVG(col)返回指定列的平均值
+    COUNT(col)返回指定列中非NULL值的个数
+    MIN(col)返回指定列的最小值
+    MAX(col)返回指定列的最大值
+    SUM(col)返回指定列的所有值之和
+    GROUP_CONCAT(col) 返回由属于一组的列值连接组合而成的结果    
+
+三、字符串函数
+
+    CHAR_LENGTH(str)
+        返回值为字符串str 的长度，长度的单位为字符。一个多字节字符算作一个单字符。
+    CONCAT(str1,str2,...)
+        字符串拼接
+        如有任何一个参数为NULL ，则返回值为 NULL。
+    CONCAT_WS(separator,str1,str2,...)
+        字符串拼接（自定义连接符）
+        CONCAT_WS()不会忽略任何空字符串。 (然而会忽略所有的 NULL）。
+
+    CONV(N,from_base,to_base)
+        进制转换
+        例如：
+            SELECT CONV('a',16,2); 表示将 a 由16进制转换为2进制字符串表示
+
+    FORMAT(X,D)
+        将数字X 的格式写为'#,###,###.##',以四舍五入的方式保留小数点后 D 位， 并将结果以字符串的形式返回。若  D 为 0, 则返回结果不带有小数点，或不含小数部分。
+        例如：
+            SELECT FORMAT(12332.1,4); 结果为： '12,332.1000'
+    INSERT(str,pos,len,newstr)
+        在str的指定位置插入字符串
+            pos：要替换位置其实位置
+            len：替换的长度
+            newstr：新字符串
+        特别的：
+            如果pos超过原字符串长度，则返回原字符串
+            如果len超过原字符串长度，则由新字符串完全替换
+    INSTR(str,substr)
+        返回字符串 str 中子字符串的第一个出现位置。
+
+    LEFT(str,len)
+        返回字符串str 从开始的len位置的子序列字符。
+
+    LOWER(str)
+        变小写
+
+    UPPER(str)
+        变大写
+
+    REVERSE(str)
+        返回字符串 str ，顺序和字符顺序相反。
+
+    SUBSTRING(str,pos) , SUBSTRING(str FROM pos) SUBSTRING(str,pos,len) , SUBSTRING(str FROM pos FOR len)
+        不带有len 参数的格式从字符串str返回一个子字符串，起始于位置 pos。带有len参数的格式从字符串str返回一个长度同len字符相同的子字符串，起始于位置 pos。 使用 FROM的格式为标准 SQL 语法。也可能对pos使用一个负值。假若这样，则子字符串的位置起始于字符串结尾的pos 字符，而不是字符串的开头位置。在以下格式的函数中可以对pos 使用一个负值。
+
+        mysql> SELECT SUBSTRING('Quadratically',5);
+            -> 'ratically'
+
+        mysql> SELECT SUBSTRING('foobarbar' FROM 4);
+            -> 'barbar'
+
+        mysql> SELECT SUBSTRING('Quadratically',5,6);
+            -> 'ratica'
+
+        mysql> SELECT SUBSTRING('Sakila', -3);
+            -> 'ila'
+
+        mysql> SELECT SUBSTRING('Sakila', -5, 3);
+            -> 'aki'
+
+        mysql> SELECT SUBSTRING('Sakila' FROM -4 FOR 2);
+            -> 'ki'
+
+四、日期和时间函数
+    CURDATE()或CURRENT_DATE() 返回当前的日期
+    CURTIME()或CURRENT_TIME() 返回当前的时间
+    DAYOFWEEK(date)   返回date所代表的一星期中的第几天(1~7)
+    DAYOFMONTH(date)  返回date是一个月的第几天(1~31)
+    DAYOFYEAR(date)   返回date是一年的第几天(1~366)
+    DAYNAME(date)   返回date的星期名，如：SELECT DAYNAME(CURRENT_DATE);
+    FROM_UNIXTIME(ts,fmt)  根据指定的fmt格式，格式化UNIX时间戳ts
+    HOUR(time)   返回time的小时值(0~23)
+    MINUTE(time)   返回time的分钟值(0~59)
+    MONTH(date)   返回date的月份值(1~12)
+    MONTHNAME(date)   返回date的月份名，如：SELECT MONTHNAME(CURRENT_DATE);
+    NOW()    返回当前的日期和时间
+    QUARTER(date)   返回date在一年中的季度(1~4)，如SELECT QUARTER(CURRENT_DATE);
+    WEEK(date)   返回日期date为一年中第几周(0~53)
+    YEAR(date)   返回日期date的年份(1000~9999)
+
+    重点:
+    DATE_FORMAT(date,format) 根据format字符串格式化date值
+
+       mysql> SELECT DATE_FORMAT('2009-10-04 22:23:00', '%W %M %Y');
+        -> 'Sunday October 2009'
+       mysql> SELECT DATE_FORMAT('2007-10-04 22:23:00', '%H:%i:%s');
+        -> '22:23:00'
+       mysql> SELECT DATE_FORMAT('1900-10-04 22:23:00',
+        ->                 '%D %y %a %d %m %b %j');
+        -> '4th 00 Thu 04 10 Oct 277'
+       mysql> SELECT DATE_FORMAT('1997-10-04 22:23:00',
+        ->                 '%H %k %I %r %T %S %w');
+        -> '22 22 10 10:23:00 PM 22:23:00 00 6'
+       mysql> SELECT DATE_FORMAT('1999-01-01', '%X %V');
+        -> '1998 52'
+       mysql> SELECT DATE_FORMAT('2006-06-00', '%d');
+        -> '00'
+
+五、加密函数
+    MD5()    
+        计算字符串str的MD5校验和
+    PASSWORD(str)   
+        返回字符串str的加密版本，这个加密过程是不可逆转的，和UNIX密码加密过程使用不同的算法。
+
+六、控制流函数            
+    CASE WHEN[test1] THEN [result1]...ELSE [default] END
+        如果testN是真，则返回resultN，否则返回default
+    CASE [test] WHEN[val1] THEN [result]...ELSE [default]END  
+        如果test和valN相等，则返回resultN，否则返回default
+
+    IF(test,t,f)   
+        如果test是真，返回t；否则返回f
+
+    IFNULL(arg1,arg2) 
+        如果arg1不是空，返回arg1，否则返回arg2
+
+    NULLIF(arg1,arg2) 
+        如果arg1=arg2返回NULL；否则返回arg1        
+
+```
+
+### 列举 创建索引但是无法命中索引的8种情况。
+1. 应尽量避免在 where 子句中使用 != 或 <> 操作符，否则引擎将放弃使用索引而进行全表扫描；
+2. 尽量避免在 where 子句中使用 or 来连接条件，否则将导致引擎放弃使用索引而进行全表扫描，即使其中有条件带索引也不会使用，这也是为什么尽量少用 or 的原因；
+
+
+
+3. 对于多列索引，不是使用的第一部分，则不会使用索引；
+
+4. 如果列类型是字符串，那一定要在条件中将数据使用引号引用起来，否则不会使用索引；
+
+5. like的模糊查询以 % 开头，索引失效；
+
+
+
+6. 应尽量避免在 where 子句中对字段进行表达式操作，这将导致引擎放弃使用索引而进行全表扫描；
+
+如：
+
+```
+select id from t where num/2 = 100 
+```
+
+应改为:
+
+```
+select id from t where num = 100*2；
+```
+
+7、应尽量避免在 where 子句中对字段进行函数操作，这将导致引擎放弃使用索引而进行全表扫描；
+
+例如：
+```
+select id from t where substring(name,1,3) = 'abc' – name;
+```
+以abc开头的，应改成：
+```
+select id from t where name like 'abc%' 
+```
+例如：
+```
+select id from t where datediff(day, createdate, '2005-11-30') = 0 – '2005-11-30';
+```
+应改为:
+```
+select id from t where createdate >= '2005-11-30' and createdate < '2005-12-1';
+```
+8. 不要在 where 子句中的 “=” 左边进行函数、算术运算或其他表达式运算，否则系统将可能无法正确使用索引；
+9. 如果MySQL估计使用全表扫描要比使用索引快，则不使用索引；
+10. 不适合键值较少的列（重复数据较多的列）
+假如索引列TYPE有5个键值，如果有1万条数据，那么 WHERE TYPE = 1将访问表中的2000个数据块。再加上访问索引块，一共要访问大于200个的数据块。如果全表扫描，假设10条数据一个数据块，那么只需访问1000个数据块，既然全表扫描访问的数据块少一些，肯定就不会利用索引了。
+
+
+
+1、应尽量避免在 where 子句中使用 != 或 <> 操作符，否则引擎将放弃使用索引而进行全表扫描；
+
+
+
+2、尽量避免在 where 子句中使用 or 来连接条件，否则将导致引擎放弃使用索引而进行全表扫描，即使其中有条件带索引也不会使用，这也是为什么尽量少用 or 的原因；
+
+
+
+3、对于多列索引，不是使用的第一部分，则不会使用索引；
+
+4、如果列类型是字符串，那一定要在条件中将数据使用引号引用起来，否则不会使用索引；
+
+
+
+5、like的模糊查询以 % 开头，索引失效；
+
+
+
+6、应尽量避免在 where 子句中对字段进行表达式操作，这将导致引擎放弃使用索引而进行全表扫描；
+
+如：
+```
+select id from t where num/2 = 100 
+```
+应改为:
+```
+select id from t where num = 100*2；
+```
+7、应尽量避免在 where 子句中对字段进行函数操作，这将导致引擎放弃使用索引而进行全表扫描；
+
+例如：
+```
+select id from t where substring(name,1,3) = 'abc' – name;
+```
+以abc开头的，应改成：
+```
+select id from t where name like ‘abc%’ 
+```
+例如：
+```
+select id from t where datediff(day, createdate, '2005-11-30') = 0 – '2005-11-30';
+```
+应改为:
+```
+select id from t where createdate >= '2005-11-30' and createdate < '2005-12-1';
+```
+8、不要在 where 子句中的 “=” 左边进行函数、算术运算或其他表达式运算，否则系统将可能无法正确使用索引；
+
+9、如果MySQL估计使用全表扫描要比使用索引快，则不使用索引；
+
+10、不适合键值较少的列（重复数据较多的列）
+
+假如索引列TYPE有5个键值，如果有1万条数据，那么 WHERE TYPE = 1将访问表中的2000个数据块。再加上访问索引块，一共要访问大于200个的数据块。如果全表扫描，假设10条数据一个数据块，那么只需访问1000个数据块，既然全表扫描访问的数据块少一些，肯定就不会利用索引了。
+
+--------------------- 
+> 作者：徐刘根 
+> 来源：CSDN 
+> 原文：https://blog.csdn.net/xlgen157387/article/details/79572598 
+> 版权声明：本文为博主原创文章，转载请附上博文链接！
+--------------------- 
+
+
+
+
 
 如何开启慢日志查询？
 
@@ -1178,7 +1634,7 @@ MySQL常见的函数？
 
 简述MySQL的执行计划？
 
-### 在对name做了唯一索引前提下，简述以下区别：  
+### 在对name做了唯一索引前提下，简述以下区别：
 
 ``````mysql
 select * from tb where name = ‘Oldboy-Wupeiqi’
