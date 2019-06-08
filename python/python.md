@@ -514,7 +514,7 @@ file.xreadlines()则直接返回一个iter(file)迭代器，在Python 2.3之后�
 
 Lambda 函数又称匿名函数，匿名函数就是没有名字的函数
 
-``````
+``````python
 >>> lambda x, y : x+y
 <function <lambda> at 0x102bc1c80>
 ``````
@@ -536,11 +536,56 @@ Python pass 是空语句，是为了保持程序结构的完整性。pass 不做
 
 ## 24. *arg和**kwarg作用
 
+用`*args`和`**kwargs`只是为了方便并没有强制使用它们.
 
+当你不确定你的函数里将要传递多少参数时你可以用`*args`.例如,它可以传递任意数量的参数:
 
+```python
+>>> def print_everything(*args):
+        for count, thing in enumerate(args):
+...         print '{0}. {1}'.format(count, thing)
+...
+>>> print_everything('apple', 'banana', 'cabbage')
+0. apple
+1. banana
+2. cabbage
+```
 
+相似的,`**kwargs`允许你使用没有事先定义的参数名:
 
+```python
+>>> def table_things(**kwargs):
+...     for name, value in kwargs.items():
+...         print '{0} = {1}'.format(name, value)
+...
+>>> table_things(apple = 'fruit', cabbage = 'vegetable')
+cabbage = vegetable
+apple = fruit
+```
 
+你也可以混着用.命名参数首先获得参数值然后所有的其他参数都传递给`*args`和`**kwargs`.命名参数在列表的最前端.例如:
+
+```python
+def table_things(titlestring, **kwargs)
+```
+
+`*args`和`**kwargs`可以同时在函数的定义中,但是`*args`必须在`**kwargs`前面.
+
+当调用函数时你也可以用`*`和`**`语法.例如:
+
+```python
+>>> def print_three_things(a, b, c):
+...     print 'a = {0}, b = {1}, c = {2}'.format(a,b,c)
+...
+>>> mylist = ['aardvark', 'baboon', 'cat']
+>>> print_three_things(*mylist)
+
+a = aardvark, b = baboon, c = cat
+```
+
+就像你看到的一样,它可以传递列表(或者元组)的每一项并把它们解包.注意必须与它们在函数里的参数相吻合.当然,你也可以在函数定义或者函数调用时用*.
+
+<http://stackoverflow.com/questions/3394835/args-and-kwargs>
 
 ## 25. is和==的区别
 
@@ -570,9 +615,13 @@ Python pass 是空语句，是为了保持程序结构的完整性。pass 不做
 
 
 
-Python垃圾回收机制？
+## 26. Python垃圾回收机制？
 
-### Python的可变类型和不可变类型？
+Python的GC模块主要运用了“引用计数”（reference counting）来跟踪和回收垃圾。在引用计数的基础上，还可以通过“标记-清除”（mark and sweep）解决容器对象可能产生的循环引用的问题。通过“分代回收”（generation collection）以空间换取时间来进一步提高垃圾回收的效率。
+
+[具体的资料在这里](<http://python.jobbole.com/82061/>)
+
+## 27. Python的可变类型和不可变类型？
 
 可变类型（mutable）：**列表，字典**
 
@@ -580,7 +629,7 @@ Python垃圾回收机制？
 
 **这里的可变不可变，是指内存中的那块内容（value）是否可以被改变**
 
-### 求结果：
+## 28.求结果：
 
 ``````python
 v = dict.fromkeys(['k1','k2'],[])
@@ -598,7 +647,7 @@ print(v)
 
 
 
-### 求结果：
+### 29.求结果：
 
 ``````python
 def num():
@@ -610,7 +659,7 @@ print([m(2) for m in num()])
 
 `[6,6,6,6]`
 
-### 列举常见的内置函数？
+### 30. 列举常见的内置函数？
 
 #### 数学相关
 
@@ -661,11 +710,13 @@ print([m(2) for m in num()])
 - next(iterator[, default]) : 接收一个迭代器，返回迭代器中的数值，如果设置了default，则当迭代器中的元素遍历后，输出default内容。
 - reversed(sequence) ： 生成一个反转序列的迭代器。 reversed('abc') >>> ['c','b','a']
 
-### filter、map、reduce的作用？
+### 31. filter、map、reduce的作用？
 
+![VDNrdS.jpg](https://s2.ax1x.com/2019/06/08/VDNrdS.jpg)
 
+一图胜千言
 
-一行代码实现9*9乘法表
+## 32. 一行代码实现9*9乘法表
 
 如何安装第三方模块？以及用过哪些第三方模块？
 
@@ -780,15 +831,15 @@ print(‘hello %s and %s‘%(‘df‘,‘another df‘))
 
  
 
-　　**第二种**：**最好用的**
+**第二种**：**最好用的**
 
-　　**优点：不需要一个个的格式化，可以利用字典的方式，缩短时间**
+**优点：不需要一个个的格式化，可以利用字典的方式，缩短时间**
 
 ```
 print(‘hello %(first)s and %(second)s‘%{‘first‘:‘df‘ , ‘second‘:‘another df‘})
 ```
 
-　　**第三种**：**最先进的**
+**第三种**：**最先进的**
 
 　   **优点：可读性强**
 
